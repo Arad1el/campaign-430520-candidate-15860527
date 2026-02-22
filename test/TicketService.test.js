@@ -3,28 +3,25 @@ import { describe, it, before, mock, beforeEach } from 'node:test';
 
 import TicketTypeRequest from '../src/pairtest/lib/TicketTypeRequest.js';
 import InvalidPurchaseException from '../src/pairtest/lib/InvalidPurchaseException.js';
-import { TicketPrices } from '../src/pairtest/lib/TicketPricing.js';
+import { SeatsPerTicketType, TicketPrices } from '../src/pairtest/lib/TicketStatistics.js';
 
+//Tests for the TicketService class
 describe("TicketService", async () => {
-    let paymentsMade;
     let paymentAmount;
     const paymentServiceMock = mock.fn(class {
         makePayment(accountId, totalAmountToPay) {
-            paymentsMade = true;
             paymentAmount = totalAmountToPay;
         }
     });
 
-    let seatsReserved;
     let seatAmount;
     const seatBookingMock = mock.fn(class {
         reserveSeat(accountId, totalSeatsToAllocate) {
-            seatsReserved = true;
             seatAmount = totalSeatsToAllocate;
         }
     });
-    let ticketService;
 
+    let ticketService;
     before(async() => {
         //Mock the external services to prevent them being called, and to track them being invoked
         const paymentServiceNamedExports = await import("../src/thirdparty/paymentgateway/TicketPaymentService.js")
@@ -49,10 +46,8 @@ describe("TicketService", async () => {
 
     beforeEach(() => {
         //Reset variables for tracking the mocked services 
-        paymentsMade = false;
-        paymentAmount = 0;
-        seatsReserved = false;
-        seatAmount = 0;
+        paymentAmount = -1;
+        seatAmount = -1;
     });
 
     describe("Account IDs", () => {
@@ -106,19 +101,22 @@ describe("TicketService", async () => {
         it("should allow equal INFANT tickets and ADULT tickets", () => {
             assert.doesNotThrow(() => ticketService.purchaseTickets(1,
                 new TicketTypeRequest("ADULT", 1),
-                new TicketTypeRequest("INFANT", 1)));
+                new TicketTypeRequest("INFANT", 1)
+            ));
         });
 
         it("should allow more ADULT tickets than INFANT tickets", () => {
             assert.doesNotThrow(() => ticketService.purchaseTickets(1, 
                 new TicketTypeRequest("ADULT", 2),
-                new TicketTypeRequest("INFANT", 1)));
+                new TicketTypeRequest("INFANT", 1)
+            ));
         });
 
         it("should allow CHILD tickets when at least one ADULT ticket", () => {
             assert.doesNotThrow(() => ticketService.purchaseTickets(1,
                 new TicketTypeRequest("ADULT", 1),
-                new TicketTypeRequest("CHILD", 10)));
+                new TicketTypeRequest("CHILD", 10)
+            ));
         });
     });
 
@@ -153,8 +151,7 @@ describe("TicketService", async () => {
                 new TicketTypeRequest("ADULT", 1))
             );
 
-            assert.equal(seatsReserved, true);
-            assert.equal(seatAmount, 1);
+            assert.equal(seatAmount, SeatsPerTicketType.ADULT);
         });
 
         it("child tickets have correct seat requirement", () => {
@@ -163,8 +160,7 @@ describe("TicketService", async () => {
                 new TicketTypeRequest("CHILD", 1))
             );
 
-            assert.equal(seatsReserved, true);
-            assert.equal(seatAmount, 2);
+            assert.equal(seatAmount, SeatsPerTicketType.ADULT + SeatsPerTicketType.CHILD);
         });
 
         it("infant tickets have correct seat requirement", () => {
@@ -173,8 +169,7 @@ describe("TicketService", async () => {
                 new TicketTypeRequest("INFANT", 1))
             );
 
-            assert.equal(seatsReserved, true);
-            assert.equal(seatAmount, 1);
+            assert.equal(seatAmount, SeatsPerTicketType.ADULT + SeatsPerTicketType.INFANT);
         });
     });
 
@@ -184,7 +179,6 @@ describe("TicketService", async () => {
                 new TicketTypeRequest("ADULT", 1))
             );
 
-            assert.equal(paymentsMade, true);
             assert.equal(paymentAmount, TicketPrices.ADULT);
         });
 
@@ -194,7 +188,6 @@ describe("TicketService", async () => {
                 new TicketTypeRequest("CHILD", 1))
             );
 
-            assert.equal(paymentsMade, true);
             assert.equal(paymentAmount, TicketPrices.ADULT + TicketPrices.CHILD);
         });
 
@@ -204,7 +197,6 @@ describe("TicketService", async () => {
                 new TicketTypeRequest("INFANT", 1))
             );
 
-            assert.equal(paymentsMade, true);
             assert.equal(paymentAmount, TicketPrices.ADULT + TicketPrices.INFANT);
         });
     });
