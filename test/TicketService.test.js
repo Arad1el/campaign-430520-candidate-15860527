@@ -3,21 +3,25 @@ import { describe, it, before, mock, beforeEach } from 'node:test';
 
 import TicketTypeRequest from '../src/pairtest/lib/TicketTypeRequest.js';
 import InvalidPurchaseException from '../src/pairtest/lib/InvalidPurchaseException.js';
-import { SeatsPerTicketType, TicketPrices } from '../src/pairtest/lib/TicketStatistics.js';
+import TicketCalculator from '../src/pairtest/lib/TicketCalculator.js';
 
 //Tests for the TicketService class
 describe("TicketService", async () => {
     let paymentAmount;
+    let paymentAccount;
     const paymentServiceMock = mock.fn(class {
         makePayment(accountId, totalAmountToPay) {
             paymentAmount = totalAmountToPay;
+            paymentAccount = accountId;
         }
     });
 
     let seatAmount;
+    let seatAccount;
     const seatBookingMock = mock.fn(class {
         reserveSeat(accountId, totalSeatsToAllocate) {
             seatAmount = totalSeatsToAllocate;
+            seatAccount = accountId;
         }
     });
 
@@ -47,7 +51,9 @@ describe("TicketService", async () => {
     beforeEach(() => {
         //Reset variables for tracking the mocked services 
         paymentAmount = -1;
+        paymentAccount = -1;
         seatAmount = -1;
+        seatAccount = -1;
     });
 
     describe("Account IDs", () => {
@@ -61,6 +67,21 @@ describe("TicketService", async () => {
                 InvalidPurchaseException);
         });
 
+        it("should use correct Account ID for payment", () => {            
+            const req = new TicketTypeRequest("ADULT", 2);
+            const passedAccountId = 1;
+
+            assert.doesNotThrow(() => ticketService.purchaseTickets(passedAccountId, req));
+            assert.strict.equal(paymentAccount, passedAccountId);
+        });
+
+        it("should use correct Account ID for seat reservations", () => {            
+            const req = new TicketTypeRequest("ADULT", 2);
+            const passedAccountId = 1;
+
+            assert.doesNotThrow(() => ticketService.purchaseTickets(passedAccountId, req));
+            assert.strict.equal(seatAccount, passedAccountId);
+        });
     });
 
     describe("Should NOT accept more than 25 tickets", () => {
@@ -145,59 +166,61 @@ describe("TicketService", async () => {
         });
     });
 
-    describe("Should calculate seats correctly", () => {
+    describe("Should request correct number of seats", () => {
         it("adult tickets have correct seat requirement", () => {
-            assert.doesNotThrow(() => ticketService.purchaseTickets(1,
-                new TicketTypeRequest("ADULT", 1))
-            );
+            const req = new TicketTypeRequest("ADULT", 2);
 
-            assert.equal(seatAmount, SeatsPerTicketType.ADULT);
+            assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
+            assert.strict.equal(seatAmount, TicketCalculator.getRequiredSeats(req));
         });
 
         it("child tickets have correct seat requirement", () => {
-            assert.doesNotThrow(() => ticketService.purchaseTickets(1,
-                new TicketTypeRequest("ADULT", 1),
-                new TicketTypeRequest("CHILD", 1))
-            );
+            const req = [
+                new TicketTypeRequest("ADULT", 2),
+                new TicketTypeRequest("CHILD", 1)
+            ];
 
-            assert.equal(seatAmount, SeatsPerTicketType.ADULT + SeatsPerTicketType.CHILD);
+            assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
+            assert.strict.equal(seatAmount, TicketCalculator.getRequiredSeats(req));
         });
 
         it("infant tickets have correct seat requirement", () => {
-            assert.doesNotThrow(() => ticketService.purchaseTickets(1,
-                new TicketTypeRequest("ADULT", 1),
-                new TicketTypeRequest("INFANT", 1))
-            );
+            const req = [
+                new TicketTypeRequest("ADULT", 2),
+                new TicketTypeRequest("INFANT", 1)
+            ];
 
-            assert.equal(seatAmount, SeatsPerTicketType.ADULT + SeatsPerTicketType.INFANT);
+            assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
+            assert.strict.equal(seatAmount, TicketCalculator.getRequiredSeats(req));
         });
     });
 
-    describe("Should calculate payments correctly", () => {
+    describe("Should request correct payment amount", () => {
         it("adult tickets have correct cost", () => {
-            assert.doesNotThrow(() => ticketService.purchaseTickets(1,
-                new TicketTypeRequest("ADULT", 1))
-            );
+            const req = new TicketTypeRequest("ADULT", 1);
 
-            assert.equal(paymentAmount, TicketPrices.ADULT);
+            assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
+            assert.strict.equal(paymentAmount, TicketCalculator.getTotalPrice(req));
         });
 
         it("child tickets have correct cost", () => {
-            assert.doesNotThrow(() => ticketService.purchaseTickets(1,
+            const req = [
                 new TicketTypeRequest("ADULT", 1),
-                new TicketTypeRequest("CHILD", 1))
-            );
+                new TicketTypeRequest("CHILD", 1)
+            ];
 
-            assert.equal(paymentAmount, TicketPrices.ADULT + TicketPrices.CHILD);
+            assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
+            assert.strict.equal(paymentAmount, TicketCalculator.getTotalPrice(req));
         });
 
         it("infant tickets have correct cost", () => {
-            assert.doesNotThrow(() => ticketService.purchaseTickets(1,
+            const req = [
                 new TicketTypeRequest("ADULT", 1),
-                new TicketTypeRequest("INFANT", 1))
-            );
+                new TicketTypeRequest("INFANT", 1)
+            ];
 
-            assert.equal(paymentAmount, TicketPrices.ADULT + TicketPrices.INFANT);
+            assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
+            assert.strict.equal(paymentAmount, TicketCalculator.getTotalPrice(req));
         });
     });
 });

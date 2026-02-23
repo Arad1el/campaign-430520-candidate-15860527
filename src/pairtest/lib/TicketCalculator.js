@@ -7,33 +7,20 @@ All methods are static because there's no reason to have an instance of this cla
 */
 export default class TicketCalculator {
     static #getCountOfEachType(...ticketTypeRequests) {
-        let adultTicketCount = 0;
-        let childTicketCount = 0;
-        let infantTicketCount = 0;
+        const groupedCounts = {
+            "ADULT": 0,
+            "CHILD": 0,
+            "INFANT": 0
+        };
 
         ticketTypeRequests
             .flat(Infinity)
             .forEach((req) => {
-                const ticketCount = req.getNoOfTickets();
-                switch(req.getTicketType()) {
-                    case "ADULT":
-                        adultTicketCount += ticketCount;
-                        break;
-                    case "CHILD":
-                        childTicketCount += ticketCount;
-                        break;
-                    case "INFANT":
-                        infantTicketCount += ticketCount;
-                        break;
-                }
+                groupedCounts[req.getTicketType()] += req.getNoOfTickets();
             }
         );
 
-        return {
-            "ADULT": adultTicketCount,
-            "CHILD": childTicketCount,
-            "INFANT": infantTicketCount
-        };
+        return groupedCounts;
     }
 
     static groupRequestsByType(...ticketTypeRequests) {
