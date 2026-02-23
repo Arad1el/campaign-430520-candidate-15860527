@@ -171,7 +171,7 @@ describe("TicketService", async () => {
             const req = new TicketTypeRequest("ADULT", 2);
 
             assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
-            assert.equal(seatAmount, TicketCalculator.getRequiredSeats(req));
+            assert.strict.equal(seatAmount, TicketCalculator.getRequiredSeats(req));
         });
 
         it("child tickets have correct seat requirement", () => {
@@ -181,7 +181,7 @@ describe("TicketService", async () => {
             ];
 
             assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
-            assert.equal(seatAmount, TicketCalculator.getRequiredSeats(req));
+            assert.strict.equal(seatAmount, TicketCalculator.getRequiredSeats(req));
         });
 
         it("infant tickets have correct seat requirement", () => {
@@ -191,7 +191,7 @@ describe("TicketService", async () => {
             ];
 
             assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
-            assert.equal(seatAmount, TicketCalculator.getRequiredSeats(req));
+            assert.strict.equal(seatAmount, TicketCalculator.getRequiredSeats(req));
         });
     });
 
@@ -200,7 +200,7 @@ describe("TicketService", async () => {
             const req = new TicketTypeRequest("ADULT", 1);
 
             assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
-            assert.equal(paymentAmount, TicketCalculator.getTotalPrice(req));
+            assert.strict.equal(paymentAmount, TicketCalculator.getTotalPrice(req));
         });
 
         it("child tickets have correct cost", () => {
@@ -210,7 +210,7 @@ describe("TicketService", async () => {
             ];
 
             assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
-            assert.equal(paymentAmount, TicketCalculator.getTotalPrice(req));
+            assert.strict.equal(paymentAmount, TicketCalculator.getTotalPrice(req));
         });
 
         it("infant tickets have correct cost", () => {
@@ -220,7 +220,7 @@ describe("TicketService", async () => {
             ];
 
             assert.doesNotThrow(() => ticketService.purchaseTickets(1, req));
-            assert.equal(paymentAmount, TicketCalculator.getTotalPrice(req));
+            assert.strict.equal(paymentAmount, TicketCalculator.getTotalPrice(req));
         });
     });
 });

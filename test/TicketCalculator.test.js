@@ -31,21 +31,21 @@ describe("TicketCalculator", async () => {
             const childTicketCount = groupedRequests.find((req) => req.getTicketType() === "CHILD").getNoOfTickets();
             const infantTicketCount = groupedRequests.find((req) => req.getTicketType() === "INFANT").getNoOfTickets();
 
-            assert.equal(adultTicketCount, expectedAdultCount);
-            assert.equal(childTicketCount, expectedChildCount);
-            assert.equal(infantTicketCount, expectedInfantCount);
+            assert.strict.equal(adultTicketCount, expectedAdultCount);
+            assert.strict.equal(childTicketCount, expectedChildCount);
+            assert.strict.equal(infantTicketCount, expectedInfantCount);
         });
 
         it("should calculate total number of tickets correctly", () => {
             const totalNumberOfTickets = TicketCalculator.getTotalNumberOfTickets(ticketRequests);
 
-            assert.equal(totalNumberOfTickets, (expectedAdultCount + expectedChildCount + expectedInfantCount));
+            assert.strict.equal(totalNumberOfTickets, (expectedAdultCount + expectedChildCount + expectedInfantCount));
         });
 
         it("should calculate total number of seats correctly", () => {
             const totalNumberOfSeats = TicketCalculator.getRequiredSeats(ticketRequests);
 
-            assert.equal(totalNumberOfSeats,
+            assert.strict.equal(totalNumberOfSeats,
                 (expectedAdultCount * SeatsPerTicketType.ADULT)
                 + (expectedChildCount * SeatsPerTicketType.CHILD)
                 + (expectedInfantCount * SeatsPerTicketType.INFANT)    
@@ -55,7 +55,7 @@ describe("TicketCalculator", async () => {
         it("should calculate total cost correctly", () => {
             const returnedCost = TicketCalculator.getTotalPrice(ticketRequests);
 
-            assert.equal(returnedCost,
+            assert.strict.equal(returnedCost,
                 (expectedAdultCount * TicketPrices.ADULT)
                 + (expectedChildCount * TicketPrices.CHILD)
                 + (expectedInfantCount * TicketPrices.INFANT)    
@@ -81,21 +81,21 @@ describe("TicketCalculator", async () => {
             const childTicketCount = groupedRequests.find((req) => req.getTicketType() === "CHILD").getNoOfTickets();
             const infantTicketCount = groupedRequests.find((req) => req.getTicketType() === "INFANT").getNoOfTickets();
 
-            assert.equal(adultTicketCount, expectedAdultCount);
-            assert.equal(childTicketCount, expectedChildCount);
-            assert.equal(infantTicketCount, expectedInfantCount);
+            assert.strict.equal(adultTicketCount, expectedAdultCount);
+            assert.strict.equal(childTicketCount, expectedChildCount);
+            assert.strict.equal(infantTicketCount, expectedInfantCount);
         });
 
         it("should calculate total number of tickets correctly", () => {
             const totalNumberOfTickets = TicketCalculator.getTotalNumberOfTickets(ticketRequests);
 
-            assert.equal(totalNumberOfTickets, (expectedAdultCount + expectedChildCount + expectedInfantCount));
+            assert.strict.equal(totalNumberOfTickets, (expectedAdultCount + expectedChildCount + expectedInfantCount));
         });
 
         it("should calculate total number of seats correctly", () => {
             const totalNumberOfSeats = TicketCalculator.getRequiredSeats(ticketRequests);
 
-            assert.equal(totalNumberOfSeats,
+            assert.strict.equal(totalNumberOfSeats,
                 (expectedAdultCount * SeatsPerTicketType.ADULT)
                 + (expectedChildCount * SeatsPerTicketType.CHILD)
                 + (expectedInfantCount * SeatsPerTicketType.INFANT)    
@@ -105,7 +105,7 @@ describe("TicketCalculator", async () => {
         it("should calculate total cost correctly", () => {
             const returnedCost = TicketCalculator.getTotalPrice(ticketRequests);
 
-            assert.equal(returnedCost,
+            assert.strict.equal(returnedCost,
                 (expectedAdultCount * TicketPrices.ADULT)
                 + (expectedChildCount * TicketPrices.CHILD)
                 + (expectedInfantCount * TicketPrices.INFANT)    
